@@ -4,6 +4,7 @@ use crate::utils::fs_utils;
 use crate::utils::python_utils;
 use dialoguer::{Confirm, Input, Select};
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 pub fn create_new_project() {
     println!("🎨 Welcome to KR - Python Project Generator!");
@@ -123,9 +124,14 @@ fn handle_optional_features(path: &std::path::Path, py_version: &str) {
 #[allow(dead_code)]
 fn create_template_structure(path: &Path, proj_type: &str) {
     let structure = match proj_type {
+        "API" => templates::get_api_structure(),
+        "Modular" => templates::get_modular_structure(),
+        "Microservices" => templates::get_microservices_structure(),
         "FastAPI" => templates::get_fastapi_structure(),
         "ML" => templates::get_ml_structure(),
         "DL" => templates::get_dl_structure(),
+        "Django" => templates::get_django_structure(),
+        "Streamlit" => templates::get_streamlit_structure(),
         "Streamlit + Docling + LangChain" => templates::get_streamlit_docling_langchain_structure(), // ✅ Used here
         _ => vec![],
     };
@@ -133,4 +139,29 @@ fn create_template_structure(path: &Path, proj_type: &str) {
     for (filename, content) in structure {
         fs_utils::write_file(&path.join(filename), content).expect("Failed to write file");
     }
+}
+
+#[allow(dead_code)]
+fn install_flask(path: &Path, _py_version: &str) {
+    let venv_path = path.join(".venv");
+    let pip_binary = if cfg!(target_os = "windows") {
+        venv_path.join("Scripts").join("pip")
+    } else {
+        venv_path.join("bin").join("pip")
+    };
+
+    println!("🔧 Installing Flask...");
+
+    let status = Command::new(pip_binary)
+        .arg("install")
+        .arg("flask")
+        .status()
+        .expect("Failed to execute pip command");
+
+    if status.success() {
+        println!("✅ Flask installed.");
+    } else {
+        eprintln!("❌ Failed to install Flask.");
+    }
+    
 }
