@@ -46,3 +46,50 @@
             dirs for finding system paths
             which to check installed binaries
             clap for command-line argument parsing
+
+🚀 Step 2: Commands to Test and Use the System
+
+    Here are all the steps and terminal commands you need to test and run your new kr CLI tool.
+    📦 1. Build the Project
+            cargo build --release
+            cargo build
+
+    💻 2. Run the Tool
+            cargo run -- new
+
+    You’ll be prompted through:
+
+        Project name
+        Python version
+        Project type
+
+        Optional features:
+            SQLite
+            Prisma ORM
+            Linting tools (Black, Ruff, MyPy)
+            Testing tools (pytest)
+            Git initialization
+
+    🧪 3. Try Sample Inputs
+
+        $ cargo run -- new
+        🎨 Welcome to KR - Python Project Generator!
+        What is the name of your project? my_project
+        Choose Python version:
+        > 3.11
+        Choose project type:
+        > API
+        Install SQLite? [y/N] n
+        Install Prisma ORM? [y/N] n
+        Add linting tools (Black, Ruff, MyPy)? [Y/n] y
+        Add testing framework (pytest)? [Y/n] y
+        Initialize Git repo and push to GitHub? [y/N] n
+
+    This will generate:
+
+        my_project/
+        ├── .venv/              # Virtual environment
+        ├── app.py              # Flask API template
+        ├── README.md
+        ├── requirements.txt
+        

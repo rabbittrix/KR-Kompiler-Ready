@@ -1,9 +1,9 @@
-use dialoguer::{Input, Select, Confirm};
-use std::path::PathBuf;
 use crate::project::dependencies;
 use crate::project::templates;
 use crate::utils::fs_utils;
 use crate::utils::python_utils;
+use dialoguer::{Confirm, Input, Select};
+use std::path::{Path, PathBuf};
 
 pub fn create_new_project() {
     println!("🎨 Welcome to KR - Python Project Generator!");
@@ -34,12 +34,14 @@ pub fn create_new_project() {
     let types = vec![
         "Hello World",
         "API",
+        "FastAPI",
         "Modular",
         "Microservices",
         "AI",
         "ML",
         "DL",
         "Django",
+        "Streamlit + Docling + LangChain",
     ];
     let proj_type_idx = Select::new()
         .with_prompt("Choose project type:")
@@ -55,8 +57,11 @@ pub fn create_new_project() {
     python_utils::create_venv(&path, py_version);
     fs_utils::write_file(&path.join("app.py"), templates::get_app_content(proj_type))
         .expect("Failed to write app.py file");
-    fs_utils::write_file(&path.join("README.md"), format!("# {}\n\nGenerated using KR - Python Project Manager.", name))
-        .expect("Failed to write README.md file");
+    fs_utils::write_file(
+        &path.join("README.md"),
+        format!("# {}\n\nGenerated using KR - Python Project Manager.", name),
+    )
+    .expect("Failed to write README.md file");
 
     // Handle optional features
     handle_optional_features(&path, py_version);
@@ -112,5 +117,20 @@ fn handle_optional_features(path: &std::path::Path, py_version: &str) {
         .unwrap()
     {
         crate::utils::git_utils::init_git_repo(path);
+    }
+}
+
+#[allow(dead_code)]
+fn create_template_structure(path: &Path, proj_type: &str) {
+    let structure = match proj_type {
+        "FastAPI" => templates::get_fastapi_structure(),
+        "ML" => templates::get_ml_structure(),
+        "DL" => templates::get_dl_structure(),
+        "Streamlit + Docling + LangChain" => templates::get_streamlit_docling_langchain_structure(), // ✅ Used here
+        _ => vec![],
+    };
+
+    for (filename, content) in structure {
+        fs_utils::write_file(&path.join(filename), content).expect("Failed to write file");
     }
 }

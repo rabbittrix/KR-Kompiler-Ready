@@ -1,12 +1,15 @@
 use std::process::Command;
+use std::path::Path;
 
-pub fn install_linting_tools(path: &std::path::Path, _py_version: &str) {
+pub fn install_linting_tools(path: &Path, _py_version: &str) {
     let venv_path = path.join(".venv");
     let pip_binary = if cfg!(target_os = "windows") {
         venv_path.join("Scripts").join("pip")
     } else {
         venv_path.join("bin").join("pip")
     };
+
+    println!("🔧 Installing linting tools...");
 
     let status = Command::new(&pip_binary)
         .arg("install")
@@ -23,13 +26,15 @@ pub fn install_linting_tools(path: &std::path::Path, _py_version: &str) {
     }
 }
 
-pub fn install_testing_tools(path: &std::path::Path, _py_version: &str) {
+pub fn install_testing_tools(path: &Path, _py_version: &str) {
     let venv_path = path.join(".venv");
     let pip_binary = if cfg!(target_os = "windows") {
         venv_path.join("Scripts").join("pip")
     } else {
         venv_path.join("bin").join("pip")
     };
+
+    println!("🔧 Installing testing tools...");
 
     let status = Command::new(&pip_binary)
         .arg("install")
