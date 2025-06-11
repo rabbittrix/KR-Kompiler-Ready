@@ -92,4 +92,24 @@
         ├── app.py              # Flask API template
         ├── README.md
         ├── requirements.txt
-        
+
+🚀 Final Result
+
+    Your users will be able to run:
+        kr new
+
+        Select:
+        Project name: my_doc_qa
+        Path: default or custom
+        Python version: e.g., 3.11
+        Project type: Streamlit + Docling + LangChain
+        Install linting/testing? Yes
+        Initialize Git? Yes
+
+📦 Bonus: Install Globally (Optional)
+
+    If you want to install kr globally:
+
+        cargo install --path .
+        Make sure ~/.cargo/bin is in your PATH.
+        Then simply use: kr new
