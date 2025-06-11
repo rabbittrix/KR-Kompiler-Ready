@@ -15,6 +15,30 @@ pub fn create_new_project() {
         .interact_text()
         .unwrap();
 
+    // Determine default path
+    let default_path = std::env::current_dir().unwrap().join(&name);
+    // Ask for custom path
+    let input_path: String = Input::new()
+        .with_prompt("Where should the project be created?")
+        .default(default_path.to_str().unwrap().to_string())
+        .interact_text()
+        .unwrap();
+
+    let path = PathBuf::from(input_path);
+
+    // Check if path already exists
+    if path.exists() {
+        if !Confirm::new()
+            .with_prompt("Directory already exists. Continue?")
+            .default(false)
+            .interact()
+            .unwrap()
+        {
+            println!("❌ Project creation canceled.");
+            return;
+        }
+    }
+
     // Choose Python version
     let versions = vec!["3.9", "3.10", "3.11", "3.12", "3.13"];
     let selection = Select::new()
@@ -42,6 +66,7 @@ pub fn create_new_project() {
         "ML",
         "DL",
         "Django",
+        "Streamlit",
         "Streamlit + Docling + LangChain",
     ];
     let proj_type_idx = Select::new()
@@ -163,5 +188,4 @@ fn install_flask(path: &Path, _py_version: &str) {
     } else {
         eprintln!("❌ Failed to install Flask.");
     }
-    
 }
