@@ -1,1 +1,1 @@
-pub const DEFAULT_PYTHON_VERSION: &str = "3.11";
+pub const _DEFAULT_PYTHON_VERSION: &str = "3.11";

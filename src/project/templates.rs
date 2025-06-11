@@ -7,6 +7,7 @@ pub fn get_app_content(proj_type: &str) -> &'static str {
     }
 }
 
+#[allow(dead_code)]
 pub fn get_requirements(proj_type: &str) -> String {
     match proj_type {
         "Hello World" => "streamlit\n".to_string(),
