@@ -1,0 +1,1 @@
+pub const DEFAULT_PYTHON_VERSION: &str = "3.11";

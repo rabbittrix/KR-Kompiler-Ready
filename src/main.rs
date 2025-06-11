@@ -1,3 +1,8 @@
+mod cli;
+mod config;
+mod project;
+mod utils;
+
 fn main() {
-    println!("Hello, world!");
+    cli::run();
 }

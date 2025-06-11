@@ -1,1 +1,5 @@
-/target
+/target/
+*.rs.bk
+*.pyc
+__pycache__
+.venv

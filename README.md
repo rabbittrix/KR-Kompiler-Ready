@@ -32,6 +32,12 @@
     ├── README.md
     └── .gitignore
 
+    🔌 Optional database installation (SQLite, Prisma)
+    🧹 Linting tools (Black, Ruff, MyPy)
+    🧪 Testing framework support (pytest)
+    📁 Custom project structure generation
+    🌐 GitHub template integration
+
 🔨 Step 1: Project Setup in Rust
 
         Add dependencies in Cargo.toml:
@@ -40,4 +46,3 @@
             dirs for finding system paths
             which to check installed binaries
             clap for command-line argument parsing
-            
