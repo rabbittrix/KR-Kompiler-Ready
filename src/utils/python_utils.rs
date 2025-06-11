@@ -57,6 +57,61 @@ pub fn create_venv(path: &Path, py_version: &str) {
     println!("✅ Virtual environment created at {:?}", venv_path);
 }
 
+pub fn upgrade_pip(path: &Path, _py_version: &str) {
+    let venv_path = path.join(".venv");
+    let pip_binary = if cfg!(target_os = "windows") {
+        venv_path.join("Scripts").join("python")
+    } else {
+        venv_path.join("bin").join("python3")
+    };
+
+    println!("🔧 Upgrading pip...");
+
+    let status = Command::new(&pip_binary)
+        .arg("-m")
+        .arg("pip")
+        .arg("install")
+        .arg("--upgrade")
+        .arg("pip")
+        .status();
+
+    match status {
+        Ok(s) if s.success() => println!("✅ pip upgraded successfully."),
+        _ => eprintln!("❌ Failed to upgrade pip."),
+    }
+}
+
+/// Install dependencies from requirements.txt
+pub fn install_requirements(path: &Path, _py_version: &str) {
+    let venv_path = path.join(".venv");
+    let pip_binary = if cfg!(target_os = "windows") {
+        venv_path.join("Scripts").join("pip")
+    } else {
+        venv_path.join("bin").join("pip")
+    };
+
+    let req_file = path.join("requirements.txt");
+
+    if !req_file.exists() {
+        println!("⚠️ requirements.txt not found. Skipping dependency installation.");
+        return;
+    }
+
+    println!("🔧 Installing dependencies from requirements.txt...");
+
+    let status = Command::new(pip_binary)
+        .arg("install")
+        .arg("-r")
+        .arg("requirements.txt")
+        .current_dir(path)
+        .status();
+
+    match status {
+        Ok(s) if s.success() => println!("✅ Dependencies installed successfully."),
+        _ => eprintln!("❌ Failed to install dependencies."),
+    }
+}
+
 pub fn install_sqlite(path: &Path, _py_version: &str) {
     let venv_path = path.join(".venv");
     let pip_binary = if cfg!(target_os = "windows") {

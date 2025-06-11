@@ -1,3 +1,5 @@
+// scaffold.rs
+
 use crate::project::dependencies;
 use crate::project::templates;
 use crate::utils::fs_utils;
@@ -17,6 +19,7 @@ pub fn create_new_project() {
 
     // Determine default path
     let default_path = std::env::current_dir().unwrap().join(&name);
+
     // Ask for custom path
     let input_path: String = Input::new()
         .with_prompt("Where should the project be created?")
@@ -76,27 +79,53 @@ pub fn create_new_project() {
         .unwrap();
     let proj_type = types[proj_type_idx];
 
-    // Create folder structure
-    let path = PathBuf::from(&name);
+    // Create folder structure at the user-defined path
     fs_utils::create_dir(&path).expect("Failed to create project directory");
 
+    // Show final selected path
+    println!("📁 Creating project at: {:?}", path);
+
+    // Create virtual environment
     python_utils::create_venv(&path, py_version);
-    fs_utils::write_file(&path.join("app.py"), templates::get_app_content(proj_type))
-        .expect("Failed to write app.py file");
+
+    // Write README.md
     fs_utils::write_file(
         &path.join("README.md"),
         format!("# {}\n\nGenerated using KR - Python Project Manager.", name),
     )
-    .expect("Failed to write README.md file");
+    .expect("Failed to write README.md");
 
     // Handle optional features
     handle_optional_features(&path, py_version);
 
-    println!("✅ Project '{}' created successfully!", name);
+    // Create full template structure based on project type
+    match proj_type {
+        "Hello World" => {
+            // These use the simple app.py structure
+            let content_vec = templates::get_app_content();
+            let content = content_vec
+                .into_iter()
+                .map(|(_, content)| content)
+                .collect::<Vec<&str>>()
+                .join("\n");
+            fs_utils::write_file(&path.join("app.py"), content).expect("Failed to write app.py");
+        }
+        _ => {
+            // All other types use structured template
+            templates::create_template_structure(&path, proj_type);
+        }
+    }
+
+    python_utils::upgrade_pip(&path, py_version);
+
+    python_utils::install_requirements(&path, py_version); // Critical!
+
+    python_utils::upgrade_pip(&path, py_version); // Optional but recommended
+
+    println!("🎉 Project '{}' created successfully!", name);
 }
 
 fn handle_optional_features(path: &std::path::Path, py_version: &str) {
-    // Optional DB install
     if Confirm::new()
         .with_prompt("Install SQLite?")
         .default(false)
@@ -115,7 +144,6 @@ fn handle_optional_features(path: &std::path::Path, py_version: &str) {
         python_utils::install_prisma(path, py_version);
     }
 
-    // Linting
     if Confirm::new()
         .with_prompt("Add linting tools (Black, Ruff, MyPy)?")
         .default(true)
@@ -125,7 +153,6 @@ fn handle_optional_features(path: &std::path::Path, py_version: &str) {
         dependencies::install_linting_tools(path, py_version);
     }
 
-    // Testing
     if Confirm::new()
         .with_prompt("Add testing framework (pytest)?")
         .default(true)
@@ -135,34 +162,13 @@ fn handle_optional_features(path: &std::path::Path, py_version: &str) {
         dependencies::install_testing_tools(path, py_version);
     }
 
-    // GitHub Integration
     if Confirm::new()
         .with_prompt("Initialize Git repo and push to GitHub?")
         .default(false)
         .interact()
         .unwrap()
     {
-        crate::utils::git_utils::init_git_repo(path);
-    }
-}
-
-#[allow(dead_code)]
-fn create_template_structure(path: &Path, proj_type: &str) {
-    let structure = match proj_type {
-        "API" => templates::get_api_structure(),
-        "Modular" => templates::get_modular_structure(),
-        "Microservices" => templates::get_microservices_structure(),
-        "FastAPI" => templates::get_fastapi_structure(),
-        "ML" => templates::get_ml_structure(),
-        "DL" => templates::get_dl_structure(),
-        "Django" => templates::get_django_structure(),
-        "Streamlit" => templates::get_streamlit_structure(),
-        "Streamlit + Docling + LangChain" => templates::get_streamlit_docling_langchain_structure(), // ✅ Used here
-        _ => vec![],
-    };
-
-    for (filename, content) in structure {
-        fs_utils::write_file(&path.join(filename), content).expect("Failed to write file");
+        crate::utils::git_utils::init_git_repo(&path);
     }
 }
 

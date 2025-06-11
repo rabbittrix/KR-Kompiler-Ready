@@ -1,21 +1,46 @@
-pub fn get_app_content(proj_type: &str) -> &'static str {
-    match proj_type {
-        "Hello World" => "print('Hello from KR!')\n",
-        "API" => {
-            r#"from flask import Flask
+// tempates.rs
 
-app = Flask(__name__)
+use std::path::Path;
+use crate::utils::fs_utils;
 
-@app.route('/')
-def hello():
-    return 'Hello API'
+pub fn create_template_structure(_path: &Path, proj_type: &str) {
+    let structure = match proj_type {
+        "Hello World" => get_app_content(),        
+        "API" => get_api_structure(),        
+        "FastAPI" => get_fastapi_structure(),
+        "Modular" => get_modular_structure(),
+        "Microservices" => get_microservices_structure(),
+        "ML" => get_ml_structure(),
+        "DL" => get_dl_structure(),
+        "Django" => get_django_structure(),
+        "Streamlit" => get_streamlit_structure(),
+        "Streamlit + Docling + LangChain" => get_streamlit_docling_langchain_structure(),
+        _ => vec![],
+    };
 
-if __name__ == '__main__':
-    app.run()"#
-        }
-        _ => "",
+    for (filename, content) in structure {
+        fs_utils::write_file(&_path.join(filename), content)
+            .expect("Failed to write file");
     }
 }
+
+pub fn get_app_content() -> Vec<(&'static str, &'static str)> {
+    vec![
+        (
+            "app.py",
+            "print('Hello from KR!')\n"
+        ),
+        (
+            "README.md",
+            "# Hello World Project\n\nGenerated using KR - Kompiler Ready"
+        ),
+        (
+            "requirements.txt",
+            ""
+        )
+    ]
+}
+
 pub fn get_api_structure() -> Vec<(&'static str, &'static str)> {
     vec![
         (
@@ -24,10 +49,17 @@ pub fn get_api_structure() -> Vec<(&'static str, &'static str)> {
 
 app = Flask(__name__)
 
-app = Flask(__name__)
-
 # In-memory database
-items = {}
+items = {
+    "1": "Item One",
+    "2": "Item Two",
+    "3": "Item Three",
+    "4": "Item Four",
+    "5": "Item Five",
+    "6": "Item Six",
+    "7": "Item Seven",
+    "8": "Item Eight",
+    "9": "Item Nine"}
 
 # Create
 @app.route('/items', methods=['POST'])
@@ -68,8 +100,9 @@ def delete_item(item_id):
     return jsonify({"message": "Item deleted"})
 
 if __name__ == '__main__':
-    app.run(debug=True)"#,
+    app.run(debug=True, port=5000, host='0.0.0.0')"#,
         ),
+        ("requirements.txt", "flask\n"),
         (
             "README.md",
             "# KR API Project\n\nGenerated using KR - Kompiler Ready",
