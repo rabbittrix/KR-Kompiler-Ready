@@ -21,6 +21,8 @@ pub fn install_python(version: &str) {
 
 pub fn create_venv(path: &Path, py_version: &str) {
     let venv_path = path.join(".venv");
+    println!("⏳ Creating virtual environment with Python {}...", py_version);
+
     Command::new(format!("python{}", py_version))
         .arg("-m")
         .arg("venv")
@@ -29,6 +31,8 @@ pub fn create_venv(path: &Path, py_version: &str) {
         .expect("Failed to create virtual environment")
         .wait()
         .expect("Virtual env creation failed");
+
+    println!("✅ Virtual environment created at {:?}", venv_path);
 }
 
 pub fn install_sqlite(path: &Path, _py_version: &str) {
