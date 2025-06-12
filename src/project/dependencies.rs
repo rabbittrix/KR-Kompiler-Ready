@@ -1,12 +1,12 @@
 // dependencies.rs
 
-use std::process::Command;
 use std::path::Path;
+use std::process::Command;
 
 pub fn install_linting_tools(path: &Path, _py_version: &str) {
     let venv_path = path.join(".venv");
     let pip_binary = if cfg!(target_os = "windows") {
-        venv_path.join("Scripts").join("pip")
+        venv_path.join("Scripts").join("pip.exe")
     } else {
         venv_path.join("bin").join("pip")
     };
@@ -31,7 +31,7 @@ pub fn install_linting_tools(path: &Path, _py_version: &str) {
 pub fn install_testing_tools(path: &Path, _py_version: &str) {
     let venv_path = path.join(".venv");
     let pip_binary = if cfg!(target_os = "windows") {
-        venv_path.join("Scripts").join("pip")
+        venv_path.join("Scripts").join("pip.exe")
     } else {
         venv_path.join("bin").join("pip")
     };

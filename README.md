@@ -1,7 +1,7 @@
 # 🧱 Project Overview: KR (Kompiler Ready) - Python Project Manager
 
 🎯 Goal:
-    A CLI tool written in Rust that helps users create and manage Python projects with various templates and dependency management.---
+A CLI tool written in Rust that helps users create and manage Python projects with various templates and dependency management.
 
 🧪 Future Enhancements
 
@@ -10,7 +10,7 @@
     - Multi-language support (Java, Node.js?)
     - Auto-generate CI/CD pipelines (.github/workflows/)
     - Git initialization and commit hooks
-    
+
 📁 Final Folder Structure of kr Rust CLI Tool
 
     kr/

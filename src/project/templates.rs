@@ -1,13 +1,13 @@
 // tempates.rs
-
-use std::path::Path;
 use crate::utils::fs_utils;
+use std::path::Path;
 
 pub fn create_template_structure(_path: &Path, proj_type: &str) {
     let structure = match proj_type {
-        "Hello World" => get_app_content(),        
-        "API" => get_api_structure(),        
+        "Hello World" => get_app_content(),
+        "API" => get_api_structure(),
         "FastAPI" => get_fastapi_structure(),
+        "FastAPI Simple" => get_fastapi_simple_structure(),
         "Modular" => get_modular_structure(),
         "Microservices" => get_microservices_structure(),
         "ML" => get_ml_structure(),
@@ -19,25 +19,18 @@ pub fn create_template_structure(_path: &Path, proj_type: &str) {
     };
 
     for (filename, content) in structure {
-        fs_utils::write_file(&_path.join(filename), content)
-            .expect("Failed to write file");
+        fs_utils::write_file(&_path.join(filename), content).expect("Failed to write file");
     }
 }
 
 pub fn get_app_content() -> Vec<(&'static str, &'static str)> {
     vec![
-        (
-            "app.py",
-            "print('Hello from KR!')\n"
-        ),
+        ("app.py", "print('Hello from KR!')\n"),
         (
             "README.md",
-            "# Hello World Project\n\nGenerated using KR - Kompiler Ready"
+            "# Hello World Project\n\nGenerated using KR - Kompiler Ready",
         ),
-        (
-            "requirements.txt",
-            ""
-        )
+        ("requirements.txt", ""),
     ]
 }
 
@@ -117,12 +110,19 @@ pub fn get_fastapi_structure() -> Vec<(&'static str, &'static str)> {
             r#"from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
+from contextlib import asynccontextmanager
 
 from database import engine, SessionLocal
 from models import Base, Item
 from schemas import ItemCreate, ItemResponse
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    print("Database tables created")
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 # Dependency
 def get_db():
@@ -131,11 +131,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-@app.on_event("startup")
-def startup_event():
-    Base.metadata.create_all(bind=engine)
-    print("Database tables created")
 
 @app.post("/items/", response_model=ItemResponse)
 def create_item(item: ItemCreate, db: Session = Depends(get_db)):
@@ -249,10 +244,160 @@ cd your_project_folder
 source .venv/bin/activate  # Linux/macOS
 pip install -r requirements.txt
 uvicorn main:app --reload
+```
+
+## Usage
+
+- Start the server: `uvicorn main:app --reload`
+- View API docs: http://localhost:8000/docs
+- Test endpoints: http://localhost:8000/items/"#,
+        ),
+    ]
+}
+
+/// Simple FastAPI template with app.py entry point
+pub fn get_fastapi_simple_structure() -> Vec<(&'static str, &'static str)> {
+    vec![
+        (
+            "app.py",
+            r#"from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List, Optional
+import uvicorn
+
+app = FastAPI(title="Car Brands API", description="A simple CRUD API for car brands")
+
+# Data model
+class CarBrand(BaseModel):
+    id: Optional[int] = None
+    name: str
+    country: str
+    founded_year: Optional[int] = None
+
+# In-memory database
+car_brands = [
+    {"id": 1, "name": "Toyota", "country": "Japan", "founded_year": 1937},
+    {"id": 2, "name": "BMW", "country": "Germany", "founded_year": 1916},
+    {"id": 3, "name": "Ford", "country": "USA", "founded_year": 1903},
+    {"id": 4, "name": "Mercedes-Benz", "country": "Germany", "founded_year": 1926},
+    {"id": 5, "name": "Honda", "country": "Japan", "founded_year": 1948},
+]
+
+# CRUD Operations
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to Car Brands API"}
+
+@app.get("/brands/", response_model=List[CarBrand])
+def get_brands():
+    return car_brands
+
+@app.get("/brands/{brand_id}", response_model=CarBrand)
+def get_brand(brand_id: int):
+    brand = next((brand for brand in car_brands if brand["id"] == brand_id), None)
+    if brand is None:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    return brand
+
+@app.post("/brands/", response_model=CarBrand)
+def create_brand(brand: CarBrand):
+    new_id = max(brand["id"] for brand in car_brands) + 1
+    new_brand = {"id": new_id, "name": brand.name, "country": brand.country, "founded_year": brand.founded_year}
+    car_brands.append(new_brand)
+    return new_brand
+
+@app.put("/brands/{brand_id}", response_model=CarBrand)
+def update_brand(brand_id: int, brand: CarBrand):
+    brand_index = next((i for i, b in enumerate(car_brands) if b["id"] == brand_id), None)
+    if brand_index is None:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    
+    car_brands[brand_index] = {"id": brand_id, "name": brand.name, "country": brand.country, "founded_year": brand.founded_year}
+    return car_brands[brand_index]
+
+@app.delete("/brands/{brand_id}")
+def delete_brand(brand_id: int):
+    brand_index = next((i for i, b in enumerate(car_brands) if b["id"] == brand_id), None)
+    if brand_index is None:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    
+    deleted_brand = car_brands.pop(brand_index)
+    return {"message": f"Brand {deleted_brand['name']} deleted successfully"}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="localhost", port=8000)"#,
+        ),
+        (
+            "requirements.txt",
+            r#"fastapi
+uvicorn
+pydantic
+"#,
+        ),
+        (
+            "README.md",
+            r#"# Car Brands API
+
+A simple CRUD API for managing car brands built with FastAPI.
+
+## Features
+
+- Create, Read, Update, Delete car brands
+- In-memory database
+- Pydantic model validation
+- Automatic API documentation
+
+## Setup
+
+```bash
+cd your_project_folder
+source .venv/bin/activate  # Linux/macOS
+pip install -r requirements.txt
+```
+
+## Usage
+
+### Start the server
+```bash
+python app.py
+# or
+uvicorn app:app --reload
+```
+
+### API Endpoints
+
+- **GET /** - Welcome message
+- **GET /brands/** - List all car brands
+- **GET /brands/{id}** - Get specific car brand
+- **POST /brands/** - Create new car brand
+- **PUT /brands/{id}** - Update car brand
+- **DELETE /brands/{id}** - Delete car brand
+
+### API Documentation
+
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+### Example Usage
+
+```bash
+# Get all brands
+curl http://localhost:8000/brands/
+
+# Create a new brand
+curl -X POST "http://localhost:8000/brands/" \
+     -H "Content-Type: application/json" \
+     -d '{"name": "Tesla", "country": "USA", "founded_year": 2003}'
+```"#,
+        ),
+    ]
+}
 
 pub fn get_ml_structure() -> Vec<(&'static str, &'static str)> {
     vec![
-        ("train.py", r#"import numpy as np
+        (
+            "train.py",
+            r#"import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
@@ -899,46 +1044,6 @@ echo "Starting Gateway..."
 (cd gateway && python main.py) &
 
 wait"#,
-        ),
-    ]
-}
-
-pub fn get_ml_structure() -> Vec<(&'static str, &'static str)> {
-    vec![
-        (
-            "train.py",
-            r#"import numpy as np
-import pandas as pd
-from sklearn.linear_model import LinearRegression
-# Sample ML model
-X = np.array([[1], [2], [3]])
-y = np.array([1, 2, 3])
-model = LinearRegression()
-model.fit(X, y)
-print("Model trained!")"#,
-        ),
-        (
-            "predict.py",
-            r#"from train import model
-import numpy as np
-
-# Sample prediction
-X_new = np.array([[4]])
-y_pred = model.predict(X_new)
-print("Predicted:", y_pred)"#,
-        ),
-        (
-            "requirements.txt",
-            r#"numpy
-pandas
-scikit-learn
-"#,
-        ),
-        (
-            "README.md",
-            r#"# KR ML Project
-            .. This is a basic machine learning project generated using KR - Kompiler Ready.
-            "#,
         ),
     ]
 }
